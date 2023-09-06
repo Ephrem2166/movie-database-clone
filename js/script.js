@@ -8,10 +8,12 @@ const global = {
     totalResults: 0,
   },
   api: {
-    apiKey: "d33039110fc10876bd2ec50db7309652",
+    apiKey: "",
     apiUrl: "https://api.themoviedb.org/3/",
   },
 };
+
+// Display Popular Movies
 
 async function displayPopularMovies() {
   const { results } = await fetchAPIData("movie/popular");
@@ -47,6 +49,8 @@ async function displayPopularMovies() {
     document.querySelector("#popular-movies").appendChild(div);
   });
 }
+
+// Display Popular Shows
 
 async function displayPopularShows() {
   const { results } = await fetchAPIData("tv/popular");
@@ -84,6 +88,7 @@ async function displayPopularShows() {
 }
 
 // Display movie details
+
 async function displayMovieDetails() {
   const movieId = window.location.search.split("=")[1];
   const movie = await fetchAPIData(`movie/${movieId}`);
@@ -149,6 +154,7 @@ async function displayMovieDetails() {
 }
 
 // Display show details
+
 async function displayShowDetails() {
   const showId = window.location.search.split("=")[1];
   const show = await fetchAPIData(`tv/${showId}`);
@@ -234,6 +240,7 @@ async function search() {
   }
 }
 
+// Display Search Results
 function displaySearchResults(results) {
   // Clear previous results
   document.querySelector("#search-results").innerHTML = "";
@@ -287,6 +294,7 @@ function displaySearchResults(results) {
 }
 
 // Pagination
+
 function displayPagination() {
   const div = document.createElement("div");
   div.classList.add("pagination");
@@ -321,7 +329,7 @@ function displayPagination() {
   });
 }
 
-// Display slider movies
+// Display slider for movies
 async function displaySlider() {
   const { results } = await fetchAPIData("movie/now_playing");
 
@@ -343,6 +351,7 @@ async function displaySlider() {
   });
 }
 
+// Swiper initialization
 function initSwiper() {
   const swiper = new Swiper(".swiper", {
     slidesPerView: 1,
@@ -396,7 +405,7 @@ async function searchAPIData(endpoint) {
   hideSpinner();
   return data;
 }
-
+// Show and hide Spinner
 function showSpinner() {
   document.querySelector(".spinner").classList.add("show");
 }
@@ -427,10 +436,12 @@ function showAlert(message, className = "error") {
   }, 3000);
 }
 
+// Add Commas to number values
 function addCommasToNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+// Display background image to movie and show details
 function displayBackgroundImg(type, path) {
   const overlayDiv = document.createElement("div");
   overlayDiv.style.backgroundImage = `url(https://image.tmdb.org/t/p/original/${path})`;
