@@ -1,5 +1,15 @@
 const global = {
   currentPage: window.location.pathname,
+  search: {
+    term: "",
+    type: "",
+    page: 1,
+    totalPages: 1,
+  },
+  api: {
+    apiKey: "d33039110fc10876bd2ec50db7309652",
+    apiUrl: "https://api.themoviedb.org/3/",
+  },
 };
 
 async function displayPopularMovies() {
@@ -200,6 +210,70 @@ async function displayShowDetails() {
   document.querySelector("#show-details").appendChild(div);
 }
 
+// Search movies/shows
+
+async function search() {
+  const query = window.location.search;
+  const urlParameters = new URLSearchParams(query);
+  global.search.type = urlParameters.get("type");
+  global.search.term = urlParameters.get("search-term");
+  if (global.search.term !== "" && global.search.term !== null) {
+    const { results, totalPages, page } = await searchAPIData();
+    if (results.length === 0) {
+      showAlert("No Results Found");
+      return;
+    }
+    displaySearchResults(results);
+    document.querySelector("#search-term").value = "";
+  } else {
+    showAlert("Please enter a search term!");
+  }
+}
+
+function displaySearchResults(results) {
+  results.forEach((result) => {
+    const div = document.createElement("div");
+    div.classList.add("card");
+    div.innerHTML = `
+    
+          <a href="${global.search.type}-details.html?id=${result.id}">
+          ${
+            result.poster_path
+              ? `          <img
+              src="https://image.tmdb.org/t/p/w500/${result.poster_path}"
+              class="card-img-top"
+              alt="${
+                global.search.type === "movie" ? result.title : result.name
+              }"
+            />`
+              : `          <img
+              src="images/no-image.jpg"
+              class="card-img-top"
+              alt="${
+                global.search.type === "movie" ? result.title : result.name
+              }"
+            />`
+          }  
+
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">${
+              global.search.type === "movie" ? result.title : result.name
+            }</h5>
+            <p class="card-text">
+              <small class="text-muted">Release: ${
+                global.search.type === "movie"
+                  ? result.release_date
+                  : result.first_air_date
+              }</small>
+            </p>
+          </div>
+  
+    `;
+    document.querySelector("#search-results").appendChild(div);
+  });
+}
+
 // Display slider movies
 async function displaySlider() {
   const { results } = await fetchAPIData("movie/now_playing");
@@ -248,12 +322,27 @@ function initSwiper() {
 
 // Fetch data from TMDB
 async function fetchAPIData(endpoint) {
-  const API_KEY = "d33039110fc10876bd2ec50db7309652";
-  const API_URL = "https://api.themoviedb.org/3/";
+  const API_KEY = global.api.apiKey;
+  const API_URL = global.api.apiUrl;
 
   showSpinner();
   const response = await fetch(
     `${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`
+  );
+
+  const data = await response.json();
+  hideSpinner();
+  return data;
+}
+
+// Fetch data from TMDB
+async function searchAPIData(endpoint) {
+  const API_KEY = global.api.apiKey;
+  const API_URL = global.api.apiUrl;
+
+  showSpinner();
+  const response = await fetch(
+    `${API_URL}search/${global.search.type}?api_key=${API_KEY}&language=en-US&query=${global.search.term}`
   );
 
   const data = await response.json();
@@ -277,6 +366,18 @@ function highlightActiveLinks() {
       link.classList.add("active");
     }
   });
+}
+
+// Show alert
+function showAlert(message, className = "error") {
+  const alertEl = document.createElement("div");
+  alertEl.classList.add("alert", className);
+  alertEl.appendChild(document.createTextNode(message));
+  document.querySelector("#alert").appendChild(alertEl);
+
+  setTimeout(() => {
+    alertEl.remove();
+  }, 3000);
 }
 
 function addCommasToNumber(number) {
@@ -326,6 +427,7 @@ function init() {
       console.log("TV Details");
       break;
     case "/search.html":
+      search();
       console.log("Search");
   }
   highlightActiveLinks();
